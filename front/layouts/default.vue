@@ -54,6 +54,10 @@
         <a href="https://www.linkedin.com/in/luc-varoqui-897689125/">
           Luc Varoqui
         </a>
+        &
+        <a href="https://www.linkedin.com/in/lo%C3%AFc-jumel">
+          Loïc Jumel
+        </a>
       </span>
       <div class="flex-grow-1"></div>
       <span>

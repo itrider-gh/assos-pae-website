@@ -1,9 +1,13 @@
 // import colors from 'vuetify/es5/util/colors'
 import fr from 'vuetify/es5/locale/fr'
 
-const prod = process.env.NODE_ENV === 'production'
+let prod = process.env.NODE_ENV === 'production'
+prod = true
 
 export default {
+  router: {
+    base: prod ? '/poleae/' : '/'
+  },
   mode: 'spa',
   /*
    ** Headers of the page
@@ -70,7 +74,9 @@ export default {
    ** See https://axios.nuxtjs.org/options
    */
   axios: {
-    baseURL: prod ? 'https://pae.varoqui.org/api' : 'http://localhost:3001/api',
+    baseURL: prod
+      ? 'https://assos.utc.fr/poleae/api'
+      : 'http://localhost:3001/api',
     credentials: true
   },
   /*

@@ -6,9 +6,10 @@ This is the PAE UTC Website, PAE UTC stands for "Pole Artistique et Évènementi
 
 For now, the main purpose of the Website is to allow members and associations of the BDE UTC to book dance and music rooms.
 
-## Author
+## Authors
 
 Luc Varoqui (luc@varoqui.org)
+Loïc Jumel (loic.jumel@utc.fr)
 
 ## Tech Stack
 

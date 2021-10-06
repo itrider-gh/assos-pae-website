@@ -15,9 +15,10 @@ const passport = require('./config/passport')
 const session = require('./config')['session']
 const { handleError } = require('./helpers/error')
 const config = require('./config')
+const fs = require('fs')
 
 var corsOptions = {
-  origin: config.hosts.front,
+  origin: [config.hosts.front, 'http://localhost:3000'],
   optionsSuccessStatus: 200,
   credentials: true
 }
@@ -40,6 +41,20 @@ app.use((err, req, res, next) => {
   handleError(err, res)
 })
 
-app.listen(3001, () => {
-  console.log('Listening on port 3001')
+/**
+ * Supposes onlu 1 node process listens on the socket
+ */
+if (fs.existsSync(config.app.listenOn)) {
+  console.warn('WARN : Unlink socket, is another instance running ?')
+  fs.unlinkSync(config.app.listenOn)
+}
+
+app.listen(config.app.listenOn, () => {
+  // Set socket permissions if file exists
+  if (fs.existsSync(config.app.listenOn)) {
+    console.log('Set permissions on socket')
+    fs.chmodSync(config.app.listenOn, '775')
+  }
+  console.log('Listening on ' + config.app.listenOn)
 })
+

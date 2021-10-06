@@ -1,9 +1,12 @@
+require('dotenv').config()
 const env = process.env.NODE_ENV || 'development'
-
 let config = {}
 
 if (env === 'development') {
   config =  {
+    app: {
+      listenOn: 3001
+    },
     hosts: {
       front: 'http://localhost:3000',
       back: 'http://localhost:3001',
@@ -14,12 +17,13 @@ if (env === 'development') {
       clientSecret: 'password',
     },
     db: {
-      username: 'pae',
-      password: '',
+      username: 'postgres',
+      password: 'root',
       name: 'pae',
       host: 'localhost',
-      port: '3306',
-      dialect: 'mysql'
+      port: '5432',
+      dialect: 'postgres',
+      dialectModule: 'pg'
     },
     session: {
       cookieKey: 'F4&^HYX8i*E&rzK#G5d^U5Zfqu!njxoVbMVjYckrSDNXq9hTZygx2J5q*'
@@ -28,6 +32,9 @@ if (env === 'development') {
 }
 else if (env === 'production') {
   config = {
+    app: {
+      listenOn: process.env.SOCKETORPORT,
+    },
     hosts: {
       front: process.env.FRONT_HOST,
       back: process.env.BACK_HOST,

@@ -10,7 +10,7 @@ module.exports = {
         },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
-        type: Sequelize.STRING
+        type: Sequelize.UUID
       },
       userId: {
         primaryKey: true,
@@ -20,7 +20,7 @@ module.exports = {
         },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
-        type: Sequelize.STRING
+        type: Sequelize.UUID
       },
       hasReservationRight: {
         defaultValue: false,

@@ -2,7 +2,7 @@
   "name": "front",
   "version": "1.0.0",
   "description": "Front for the PAE room booking service",
-  "author": "Luc Varoqui",
+  "author": "Luc Varoqui & Loïc Jumel",
   "scripts": {
     "dev": "nuxt --hostname 0.0.0.0",
     "build": "nuxt build",

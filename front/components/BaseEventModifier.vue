@@ -57,6 +57,26 @@
               :rules="required"
             />
           </div>
+
+          <div v-if="!eventId">
+            <v-checkbox
+              v-model="iHaveMyHealthPass"
+              :label="
+                `En enregistrant cet événement, ${
+                  assoId
+                    ? 'je m\'engage à vérifier le pass sanitaire des personnes présentes.'
+                    : 'je certifie être en possession d\'un pass sanitaire.'
+                }`
+              "
+            ></v-checkbox>
+          </div>
+          <div v-if="eventId && iHaveMyHealthPass" class="red--text">
+            {{
+              assoId
+                ? 'Je me suis engagé à vérifier le pass sanitaire des personnes présentes'
+                : "J'ai certifié être en possession d'un pass sanitaire"
+            }}
+          </div>
           <div class="red--text">
             <h3>{{ errorMessage }}</h3>
             <ul v-if="errors.length">
@@ -98,6 +118,7 @@ export default {
       errors: [], // List of errors returned by the API
 
       isRecurring: false, // Is the event recurring (admin only, creation only)
+      iHaveMyHealthPass: false,
 
       // Edited event attributes values
       roomId: null,
@@ -147,6 +168,7 @@ export default {
         this.details = event.details
         this.roomId = event.roomId
         this.assoId = event.Asso ? event.Asso.id : null
+        this.iHaveMyHealthPass = event.hasHealthPass
       }
       this.edit = true
       this.$nextTick(() => {
@@ -165,7 +187,8 @@ export default {
         assoId: this.assoId,
         start: this.$moment(`${this.date} ${this.startTime}`).toDate(),
         end: this.$moment(`${this.date} ${this.endTime}`).toDate(),
-        details: this.details
+        details: this.details,
+        hasHealthPass: this.iHaveMyHealthPass
       }
 
       if (this.isRecurring) {

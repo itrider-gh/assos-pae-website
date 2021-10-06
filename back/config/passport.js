@@ -34,6 +34,28 @@ let client = new OAuth2Strategy({
       try {
         const assosUser = (await axios.get('/user/assos', { headers: {'Authorization': 'Bearer ' + accessToken }})).data
         const assosUserIds = assosUser.map(asso => asso.id)
+
+        // check if user is in poleae asso that is not present in local db
+        const paeAssos = assosUser //.filter(asso => asso.parent.login === 'poleae')
+        const existingPaeAssosIds = await models.Asso.findAll({
+          where: {
+            id: {
+              [Op.in]: paeAssos.map(asso => asso.id)
+            }
+          },
+          attributes: ['id']
+        }).then(assos => assos.map(a => a.id))
+        // Create PAE Assos if needed
+        const assosToCreate = paeAssos.filter(asso => !existingPaeAssosIds.includes(asso.id))
+
+        for (const asso of assosToCreate) {
+          console.log(`Adding ${asso.shortname} to database`)
+          await models.Asso.create({
+            id: asso.id,
+            name: asso.shortname
+          })
+        }
+
         const assosCorresponding = await models.Asso.findAll({
           where: {
             id: {

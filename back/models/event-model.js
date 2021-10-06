@@ -5,6 +5,7 @@ const Op = require('sequelize').Op
 module.exports = (sequelize, DataTypes) => {
   const Event = sequelize.define('Event', {
     details: DataTypes.STRING,
+    hasHealthPass: DataTypes.BOOLEAN,
     start: {
       type: DataTypes.DATE,
       allowNull: false,
@@ -27,6 +28,14 @@ module.exports = (sequelize, DataTypes) => {
     },
   }, {
     validate: {
+      hasValidHealthPass() {
+        if(!this.hasHealthPass) {
+          if (!this.AssoId) {
+            throw new Error('La possession d\'un pass sanitaire valide est obligatoire')
+          }
+          throw new Error('L\'engagement de vérification des pass sanitaires est obligatoire')
+        }
+      },
       startIsBeforeEnd() {
         if (this.start >= this.end) {
           throw new Error('Le début de l\'évènement ne peut pas être après sa fin.')

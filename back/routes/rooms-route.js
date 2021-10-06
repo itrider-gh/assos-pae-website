@@ -1,12 +1,12 @@
 const express = require('express')
 const router = express.Router()
-const models  = require('../models')
-const moment  = require('moment')
-const { ErrorHandler } = require('../helpers/error')
+const models = require('../models')
+const moment = require('moment')
+const {ErrorHandler} = require('../helpers/error')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 
-const { requireAuth } = require('../helpers')
+const {requireAuth} = require('../helpers')
 
 const checkAuthorization = async (req, res, next) => {
   let event
@@ -50,7 +50,7 @@ router.get('/:start/:end', (req, res, next) => {
     include: [{
       model: models.Event,
       required: false,
-      attributes: ['id', 'start', 'end', 'details'],
+      attributes: ['id', 'start', 'end', 'details', 'hasHealthPass'],
       where: {
         start: {
           [Op.between]: [start.toDate(), end.toDate()],
@@ -88,7 +88,8 @@ router.post('/event', (req, res, next) => {
       const event = models.Event.build({
         start: start.toDate(),
         end: end.toDate(),
-        details: req.body.details
+        details: req.body.details,
+        hasHealthPass: req.body.hasHealthPass
       })
       event.setAsso(req.body.assoId, {save: false})
       event.setRoom(req.body.roomId, {save: false})
@@ -103,7 +104,7 @@ router.post('/event', (req, res, next) => {
     // Trying to insert events in one transaction
     models.sequelize.transaction((t) => {
       return Promise.all(
-        events.map(e => e.save({ transaction: t }))
+        events.map(e => e.save({transaction: t}))
       )
     })
       .catch(err => {
@@ -118,14 +119,14 @@ router.post('/event', (req, res, next) => {
     const event = models.Event.build({
       start: req.body.start,
       end: req.body.end,
-      details: req.body.details
+      details: req.body.details,
+      hasHealthPass: req.body.hasHealthPass
     })
 
     if (req.body.assoId) {
       if (checkReservationRight(req.user, req.body.assoId)) {
         event.setAsso(req.body.assoId, {save: false})
-      }
-      else {
+      } else {
         return next(ErrorHandler(403, 'Vous ne pouvez pas réserver au nom de cette assos.'))
       }
     }
@@ -154,15 +155,14 @@ router.patch('/event/:id', checkAuthorization, async (req, res, next) => {
   if (req.body.assoId) {
     if (checkReservationRight(req.user, req.body.assoId)) {
       event.setAsso(req.body.assoId, {save: false})
-    }
-    else {
+    } else {
       return next(new ErrorHandler(403, 'Vous ne pouvez pas réserver au nom de cette assos.'))
     }
   }
 
   event.setRoom(req.body.roomId, {save: false})
-  event.start = req.body.start,
-  event.end = req.body.end,
+  event.start = req.body.start
+  event.end = req.body.end
   event.details = req.body.details
 
   event.save()
@@ -177,6 +177,28 @@ router.patch('/event/:id', checkAuthorization, async (req, res, next) => {
 router.delete('/event/:id', checkAuthorization, (req, res, next) => {
   models.Event.findByPk(req.params.id).then(room => room.destroy())
   res.status(200).send()
+})
+
+router.post('/', (req, res, next) => {
+  if (!req.user.isAdmin) {
+    return next(new ErrorHandler(403, 'Insufficient privileges'))
+  }
+  const required = ['name', 'color']
+  const missing = required.filter(item => !req.body[item])
+  if(missing.length > 0) {
+    return next(new ErrorHandler(400, `Missing parameters ${missing.join(',')}`))
+  }
+  const room = models.Room.build({
+    name: req.body.name,
+    color: req.body.color
+  })
+  room.save()
+    .catch(err => {
+      return next(err)
+    })
+    .then(() => {
+      res.status(200).send()
+    })
 })
 
 module.exports = router

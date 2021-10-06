@@ -119,24 +119,22 @@
     <h4>Sous-traitants au sens du RGPD pour ce traitement</h4>
     <ul>
       <li>
-        Luc varoqui
+        Loïc JUMEL
         <ul>
-          <li>OVH</li>
+          <li>SiMDE</li>
         </ul>
       </li>
     </ul>
-    <h5>Luc Varoqui</h5>
+    <h5>Loïc JUMEL</h5>
     <p>
-      Luc Varoqui fournit bénévolement au PAE-UTC un service consistant en
-      l'hébergement et la maintenance du site. Cela inclut le stockage de
-      l'ensemble des données traitées par le site.
+      Loïc JUMEL fournit bénévolement au PAE-UTC un service consistant en la
+      maintenance du site.
     </p>
 
-    <h5>OVH</h5>
+    <h5>SiMDE</h5>
     <p>
-      L'infrastructure fournie par Luc Varoqui est hébergée par SAS OVH<br />
-      2 rue Kellermann BP 80157 59100 Roubaix -France<br />
-      Site internet : <a href="https://www.ovh.com/">www.ovh.com</a><br />
+      L'ensemble des services est hébergé sur l'infrastructure du
+      <a href="https://assos.utc.fr/simde">SiMDE</a>.
     </p>
 
     <p>
