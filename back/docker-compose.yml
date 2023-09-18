@@ -9,6 +9,6 @@ services:
     environment:
       NODE_ENV: production
     env_file:
-      - stack.env
+      - ../stack.env
     ports:
       - "127.0.0.1:9000:3001"
