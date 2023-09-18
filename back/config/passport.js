@@ -13,7 +13,7 @@ let client = new OAuth2Strategy({
   clientID: config.api.clientID,
   clientSecret: config.api.clientSecret,
   callbackURL: `${config.hosts.back}/auth/redirect`,
-  scope: ['users-infos', 'read-assos']
+  scope: ['users-infos', 'read-assos'],
 }, (accessToken, refreshToken, profile, done) => {
   models.User.findOrCreate({
     where: {id: profile.uuid}, defaults: {
