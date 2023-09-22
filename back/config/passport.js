@@ -17,7 +17,7 @@ let client = new OAuth2Strategy({
 }, (accessToken, refreshToken, profile, done) => {
   models.User.findOrCreate({
     where: {id: profile.uuid}, defaults: {
-      displayName: `${profile.firstname} ${profile.lastname}`, email: profile.email, accessToken, refreshToken
+      displayName: `${profile.firstName} ${profile.lastName}`, email: profile.email, accessToken, refreshToken
     }
   })
       .then(async ([user, created]) => {
