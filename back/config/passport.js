@@ -24,6 +24,7 @@ let client = new OAuth2Strategy({
         // Updating API tokens
         user.accessToken = accessToken
         user.refreshToken = refreshToken
+        user.displayName =  `${profile.firstName} ${profile.lastName}`
         user.save()
         // Updating Assos
         try {
