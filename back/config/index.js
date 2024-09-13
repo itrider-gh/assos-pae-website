@@ -10,11 +10,11 @@ if (env === 'development') {
     hosts: {
       front: 'http://localhost:3000',
       back: 'http://localhost:3001',
-      api: 'http://127.0.0.1:8000',
+      api: 'https://assos.utc.fr',
     },
     api: {
-      clientID: '53616d79-206a-6520-7427-61696d652021',
-      clientSecret: 'password',
+      clientID: '',
+      clientSecret: '',
     },
     db: {
       username: 'postgres',

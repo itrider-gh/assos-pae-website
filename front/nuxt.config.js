@@ -1,8 +1,8 @@
 // import colors from 'vuetify/es5/util/colors'
 import fr from 'vuetify/es5/locale/fr'
 
-let prod = process.env.NODE_ENV === 'production'
-prod = true
+let prod = process.env.NODE_ENV === 'dev'
+prod = false
 
 export default {
   router: {
