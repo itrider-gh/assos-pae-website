@@ -1,6 +1,6 @@
-'use strict'
-const moment = require('moment')
-const Op = require('sequelize').Op
+'use strict';
+const moment = require('moment');
+const { Op } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
   const Event = sequelize.define('Event', {
@@ -15,105 +15,110 @@ module.exports = (sequelize, DataTypes) => {
           msg: 'L\'évènement est dans le passé'
         }
       },
-      get: function() {
-        return moment(this.getDataValue('start')).format('YYYY-MM-DD HH:mm')
+      get() {
+        return moment(this.getDataValue('start')).format('YYYY-MM-DD HH:mm');
       }
     },
     end: {
       type: DataTypes.DATE,
       allowNull: false,
-      get: function() {
-        return moment(this.getDataValue('end')).format('YYYY-MM-DD HH:mm')
+      get() {
+        return moment(this.getDataValue('end')).format('YYYY-MM-DD HH:mm');
       }
     },
   }, {
     validate: {
       hasValidHealthPass() {
-        if(!this.hasHealthPass) {
-          if (!this.AssoId) {
-            throw new Error('La possession d\'un pass sanitaire valide est obligatoire')
-          }
-          throw new Error('L\'engagement de vérification des pass sanitaires est obligatoire')
+        if (!this.hasHealthPass && !this.assoId) {
+          throw new Error('La possession d\'un pass sanitaire valide est obligatoire');
+        } else if (!this.hasHealthPass) {
+          throw new Error('L\'engagement de vérification des pass sanitaires est obligatoire');
         }
       },
       startIsBeforeEnd() {
-        if (this.start >= this.end) {
-          throw new Error('Le début de l\'évènement ne peut pas être après sa fin.')
+        if (moment(this.start).isSameOrAfter(moment(this.end))) {
+          throw new Error('Le début de l\'évènement ne peut pas être après sa fin.');
         }
       },
       sameDay() {
         if (!moment(this.start).isSame(this.end, 'day')) {
-          throw new Error('Le début et la fin de l\'évènement doivent être le même jour.')
+          throw new Error('Le début et la fin de l\'évènement doivent être le même jour.');
         }
       },
       notASunday() {
         if (moment(this.start).day() === 0) {
-          throw new Error('Vous ne pouvez pas faire de réservation un Dimanche.')
+          throw new Error('Vous ne pouvez pas faire de réservation un Dimanche.');
         }
       },
       futurLimit() {
-        if (!this.AssoId && moment().add(3, 'week').isBefore(this.start, 'day')) {
-          throw new Error('Les réservations individuelles ne peuvent pas être plus de 3 semaines dans le futur.')
+        if (!this.assoId && moment().add(3, 'week').isBefore(moment(this.start), 'day')) {
+          throw new Error('Les réservations individuelles ne peuvent pas être plus de 3 semaines dans le futur.');
         }
       },
       async noCollision() {
-        const myStart = moment(this.start).add(1, 'minute').toDate()
-        const myEnd = moment(this.end).subtract(1, 'minute').toDate()
+        const myStart = moment(this.start).add(1, 'minute').toDate();
+        const myEnd = moment(this.end).subtract(1, 'minute').toDate();
         const events = await Event.findAll({
           where: {
             [Op.or]: [
-              {[Op.or]: [
-                { start: { [Op.between]: [myStart, myEnd] }},
-                { end: { [Op.between]: [myStart, myEnd] }}
-              ]},
-              {[Op.and]: [
-                { start: { [Op.lt]: myStart }},
-                { end: { [Op.gt]: myEnd }}
-              ]}
+              {
+                [Op.or]: [
+                  { start: { [Op.between]: [myStart, myEnd] } },
+                  { end: { [Op.between]: [myStart, myEnd] } }
+                ]
+              },
+              {
+                [Op.and]: [
+                  { start: { [Op.lt]: myStart } },
+                  { end: { [Op.gt]: myEnd } }
+                ]
+              }
             ],
-            RoomId: this.RoomId,
+            roomId: this.roomId,
             id: {
               [Op.ne]: this.id
             }
           }
-        })
+        });
         if (events.length > 0) {
-          throw new Error('Il y a déjà une réservation sur ce créneau.')
+          throw new Error('Il y a déjà une réservation sur ce créneau.');
         }
       },
       async maxHoursPerWeek() {
-        if (!this.AssoId) {
-          const message = 'Les réservations individuelles sont limitées à 3h par semaine.'
-          let minutes = moment(this.end).diff(this.start, 'minutes')
+        if (!this.assoId) {
+          const message = 'Les réservations individuelles sont limitées à 3h par semaine.';
+          let minutes = moment(this.end).diff(moment(this.start), 'minutes');
           if (minutes > 180) {
-            throw new Error(message)
+            throw new Error(message);
           }
 
-          const startOfWeek = moment(this.start).startOf('week')
-          const endOfWeek = moment(this.start).endOf('week')
-          const user = await this.getUser()
+          const startOfWeek = moment(this.start).startOf('week');
+          const endOfWeek = moment(this.start).endOf('week');
+          const user = await this.getUser();
           const events = await user.getEvents({
             where: {
               id: { [Op.ne]: this.id },
-              start: { [Op.gte]: startOfWeek },
-              end: { [Op.lte]: endOfWeek },
-              AssoId: { [Op.is]: null}
+              start: { [Op.gte]: startOfWeek.toDate() },
+              end: { [Op.lte]: endOfWeek.toDate() },
+              assoId: { [Op.is]: null }
             }
-          })
+          });
           events.forEach(e => {
-            minutes += moment(e.end).diff(e.start, 'minutes')
-          })
+            minutes += moment(e.end).diff(moment(e.start), 'minutes');
+          });
           if (minutes > 180) {
-            throw new Error(message)
+            throw new Error(message);
           }
         }
       }
     }
-  })
+  });
+
   Event.associate = function(models) {
-    Event.belongsTo(models.User)
-    Event.belongsTo(models.Room)
-    Event.belongsTo(models.Asso)
-  }
-  return Event
-}
+    Event.belongsTo(models.User, { as: 'User', foreignKey: 'userId' });
+    Event.belongsTo(models.Room, { as: 'Room', foreignKey: 'roomId' });
+    Event.belongsTo(models.Asso, { as: 'Asso', foreignKey: 'assoId' });
+  };
+
+  return Event;
+};

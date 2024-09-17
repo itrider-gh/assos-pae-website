@@ -8,22 +8,21 @@ if (env === 'development') {
       listenOn: 3001
     },
     hosts: {
-      front: 'http://localhost:3000',
-      back: 'http://localhost:3001',
-      api: 'https://assos.utc.fr',
+      front: '',
+      back: '',
+      api: 'https://auth.assos.utc.fr',
     },
     api: {
       clientID: '',
       clientSecret: '',
     },
     db: {
+      name: 'pae',
       username: 'postgres',
       password: 'root',
-      name: 'pae',
       host: 'localhost',
       port: '5432',
       dialect: 'postgres',
-      dialectModule: 'pg'
     },
     session: {
       cookieKey: 'F4&^HYX8i*E&rzK#G5d^U5Zfqu!njxoVbMVjYckrSDNXq9hTZygx2J5q*'

@@ -6,18 +6,26 @@ const { requireAuth } = require('../helpers')
 router.use(requireAuth)
 router.get('/me', async (req, res, next) => {
   try {
-    let assos
+    let assos;
     if (req.user.isAdmin) {
-      assos = await models.Asso.findAll()
-        .map((asso) => { return { id: asso.id, name: asso.name, hasReservationRight: true } })
-    }
-    else {
+      assos = await models.Asso.findAll();
+      assos = assos.map((asso) => ({
+        id: asso.id,
+        name: asso.name,
+        hasReservationRight: true
+      }));
+    } else {
       assos = await req.user.getAssos({
         attributes: ['id', 'name'],
         through: {
           attributes: ['hasReservationRight']
         }
-      }).map((asso) => { return { id: asso.id, name: asso.name, hasReservationRight: asso.AssoUser.hasReservationRight } })
+      });
+      assos = assos.map((asso) => ({
+        id: asso.id,
+        name: asso.name,
+        hasReservationRight: asso.AssoUser.hasReservationRight
+      }));
     }
 
     const user = {
@@ -26,16 +34,19 @@ router.get('/me', async (req, res, next) => {
       email: req.user.email,
       isAdmin: req.user.isAdmin,
       isMu0x: req.user.isMu0x
-    }
+    };
 
+    // Envoie la réponse une seule fois
     res.json({
       ...user,
       assos
-    })
+    });
+  } catch (error) {
+    console.error('Error in /me route:', error);
+    // Utilise `next(error)` pour transmettre l'erreur à un middleware de gestion des erreurs
+    next(error);
   }
-  catch (error) {
-    next(error)
-  }
-})
+});
+
 
 module.exports = router

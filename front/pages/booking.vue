@@ -31,10 +31,7 @@
           color="primary"
           outlined
           class="mr-4"
-          @click="
-            setToday()
-            fetchEvents()
-          "
+          @click="setToday(); fetchEvents()"
         >
           Aujourd'hui
         </v-btn>
@@ -59,11 +56,7 @@
           :interval-count="28"
           :interval-minutes="30"
           :interval-height="20"
-          :interval-format="
-            (interval) => {
-              return interval.time
-            }
-          "
+          :interval-format="(interval) => interval.time"
           :events="calendarEvents"
           :event-name="giveEventName"
           :event-color="(e) => e.color"
@@ -83,18 +76,10 @@
         >
           <v-card color="grey lighten-4" min-width="350px" flat>
             <v-toolbar :color="selectedEvent.color" dark>
-              <v-btn
-                v-if="isOwner(selectedEvent)"
-                icon
-                @click="handleEditEventClick"
-              >
+              <v-btn v-if="isOwner(selectedEvent)" icon @click="handleEditEventClick">
                 <v-icon>mdi-pencil</v-icon>
               </v-btn>
-              <v-btn
-                v-if="isOwner(selectedEvent)"
-                icon
-                @click="handleDeleteEventClick"
-              >
+              <v-btn v-if="isOwner(selectedEvent)" icon @click="handleDeleteEventClick">
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
               <v-toolbar-title>{{ selectedEvent.asso }}</v-toolbar-title>
@@ -114,7 +99,7 @@
                   {{ selectedEvent.User.email }}
                 </a>
               </p>
-              <p v-if="selectedEvent.Asso">
+              <p v-if="selectedEvent.Asso && selectedEvent.Asso.name">
                 <v-icon>mdi-music-clef-treble</v-icon>
                 {{ selectedEvent.Asso.name }}
               </p>
@@ -138,11 +123,7 @@
         <!-- EDIT DIALOG -->
         <BaseEventModifier
           ref="eventModifier"
-          :rooms="
-            rooms.map((r) => {
-              return { id: r.id, name: r.name }
-            })
-          "
+          :rooms="rooms.map(r => ({ id: r.id, name: r.name }))"
           @input="handleEventModification"
         />
       </v-sheet>
@@ -159,7 +140,6 @@ export default {
   middleware: ['authRequired'],
   data() {
     return {
-      // Calendar
       focus: null, // Date at which the Calendar is set
 
       // Rooms
@@ -173,32 +153,22 @@ export default {
     }
   },
   computed: {
-    // Switch type accordingly to Vuetify responsive breakpoints
     calendarType() {
       switch (this.$vuetify.breakpoint.name) {
         case 'xs':
-          return 'day'
         case 'sm':
           return 'day'
-        case 'md':
-          return 'week'
-        case 'lg':
-          return 'week'
-        case 'xl':
-          return 'week'
         default:
           return 'week'
       }
     },
 
-    // Return a flatten array with every events to display
-    // The room Id and color are set on every event to ease display
     calendarEvents() {
       let events = []
       this.rooms.forEach((room) => {
-        if (this.selectedRooms.find((r) => r === room.name)) {
+        if (this.selectedRooms.includes(room.name) && Array.isArray(room.events)) {
           events = events.concat(
-            room.Events.map((event) => {
+            room.events.map((event) => {
               return { ...event, color: room.color, roomId: room.id }
             })
           )
@@ -209,7 +179,6 @@ export default {
   },
 
   watch: {
-    // Reload events if we pass from day view to week view
     calendarType() {
       this.fetchEvents()
     }
@@ -220,32 +189,30 @@ export default {
   },
 
   async mounted() {
-    // Fetching all events for current week
     await this.fetchEvents()
-
-    // By default, we select every room
     this.selectedRooms = this.rooms.map((r) => r.name)
   },
 
   methods: {
-    // Fetch all events for the current week
     async fetchEvents() {
       let start, end
-
-      // Displaying a week
       if (this.calendarType === 'week') {
         start = this.$moment(this.focus).startOf('week')
         end = this.$moment(start).add(5, 'day')
-      }
-      // Displaying one day
-      else {
+      } else {
         end = start = this.$moment(this.focus)
       }
 
-      this.rooms = (await this.$axios.get(
+      const roomsData = (await this.$axios.get(
         `/rooms/${start.format('YYYY-MM-DD')}/${end.format('YYYY-MM-DD')}`
       )).data
+
+      this.rooms = roomsData.map(room => ({
+        ...room,
+        events: room.events || []  // Ensure events is an array
+      }))
     },
+
     handleEventClick({ nativeEvent, event }) {
       const open = () => {
         this.selectedEvent = { ...event }
@@ -261,15 +228,15 @@ export default {
       }
       nativeEvent.stopPropagation()
     },
-    // Display the event modifier for the selected event
+
     handleEditEventClick() {
       this.$refs.eventModifier.showModal(this.selectedEvent)
     },
-    // Display the event modifier to create a new event
+
     handleCreateEventClick() {
       this.$refs.eventModifier.showModal(null)
     },
-    // Display the event modifier with preset for the clicked day
+
     handleCalendarClick(day) {
       if (!this.selectedOpen) {
         const now = this.$moment(`${day.date} ${day.time}`).startOf('h')
@@ -280,68 +247,56 @@ export default {
         this.$refs.eventModifier.showModal(event)
       }
     },
-    // Delete the event
+
     handleDeleteEventClick() {
       this.$axios
         .delete(`/rooms/event/${this.selectedEvent.id}`)
-        .then((res) => {
+        .then(() => {
           this.fetchEvents()
           this.selectedEvent = {}
           this.selectedElement = null
           this.selectedOpen = false
         })
     },
-    // Goes to previous day/week (depending on calendarType)
+
     async handlePrevClick() {
       const now = this.$moment(this.focus)
 
-      // In case of day type, skip sundays
       if (this.calendarType === 'day') {
         now.subtract(1, 'd')
       } else {
         now.subtract(7, 'd')
       }
 
-      // Skip Sundays
       if (now.day() === 0) {
         now.subtract(1, 'd')
       }
 
-      // Update focus
       this.focus = now.format('YYYY-MM-DD')
-
-      // Fetch event for the new view
       await this.fetchEvents()
     },
-    // Goes to previous day/week (depending on calendarType)
+
     async handleNextClick() {
       const now = this.$moment(this.focus)
 
-      // In case of day type, skip sundays
       if (this.calendarType === 'day') {
         now.add(1, 'd')
       } else {
         now.add(7, 'd')
       }
 
-      // Skip Sundays
       if (now.day() === 0) {
         now.add(1, 'd')
       }
 
-      // Update focus
       this.focus = now.format('YYYY-MM-DD')
-
-      // Fetch event for the new view
       await this.fetchEvents()
     },
 
-    // When an event is modified via EventModifier component, update components
     async handleEventModification() {
       await this.fetchEvents()
     },
 
-    // Check if the user is owner of the event (or admin)
     isOwner(event) {
       return (
         event.User &&
@@ -350,19 +305,17 @@ export default {
       )
     },
 
-    // Given an event, returns the name to display on the Calendar
     giveEventName(e) {
-      const time = `${e.start.time} → ${e.end.time}`
-      if (e.input.Asso) {
-        return `${e.input.Asso.name} - ${time}`
-      } else if (e.input.User.displayName) {
-        return `${e.input.User.displayName} - ${time}`
+      const time = `${this.$moment(e.start).format('HH:mm')} → ${this.$moment(e.end).format('HH:mm')}`
+      if (e.Asso && e.Asso.name) {
+        return `${e.Asso.name} - ${time}`
+      } else if (e.User && e.User.displayName) {
+        return `${e.User.displayName} - ${time}`
       } else {
         return `Indiv. - ${time}`
       }
     },
 
-    // Set date to Today
     setToday() {
       const now = this.$moment()
       if (now.day() === 0) {
@@ -371,6 +324,7 @@ export default {
       this.focus = now.format('YYYY-MM-DD')
     }
   },
+
   head() {
     return {
       title: 'Réservations'

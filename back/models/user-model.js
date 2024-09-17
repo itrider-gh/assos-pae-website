@@ -1,19 +1,28 @@
 'use strict'
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('User', {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      allowNull: false,
+      primaryKey: true
+    },
     displayName: {
       type: DataTypes.STRING,
       allowNull: false
     },
     accessToken: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT, // Changement en TEXT pour supporter de longues chaînes
     },
     refreshToken: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT, // Changement en TEXT pour supporter de longues chaînes
     },
     email: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
+      validate: {
+        isEmail: true  // Validation pour s'assurer que c'est un email valide
+      }
     },
     isMu0x: {
       type: DataTypes.BOOLEAN,
@@ -26,9 +35,18 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     }
   }, {})
+
   User.associate = function(models) {
+    // Un utilisateur peut avoir plusieurs événements
     User.hasMany(models.Event)
-    User.belongsToMany(models.Asso, { through: models.AssoUser })
+
+    // Relation Many-to-Many avec Asso via AssoUser
+    User.belongsToMany(models.Asso, { 
+      through: models.AssoUser, 
+      foreignKey: 'userId',
+      otherKey: 'assoId'
+    })
   }
+
   return User
 }

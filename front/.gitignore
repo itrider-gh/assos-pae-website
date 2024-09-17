@@ -89,3 +89,8 @@ sw.*
 
 # Vim swap files
 *.swp
+
+
+#temp selfsigned certif & key
+
+selfsigned*

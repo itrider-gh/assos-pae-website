@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 module.exports = (sequelize, DataTypes) => {
   const Room = sequelize.define('Room', {
     name: {
@@ -9,9 +9,14 @@ module.exports = (sequelize, DataTypes) => {
     color: {
       type: DataTypes.STRING
     }
-  }, {})
+  }, {});
+  
   Room.associate = function(models) {
-    Room.hasMany(models.Event)
-  }
-  return Room
-}
+    Room.hasMany(models.Event, {
+      foreignKey: 'roomId', // Assure-toi que ce nom correspond à la colonne dans la table `Events`
+      as: 'events' // Optionnel: pour nommer l'association
+    });
+  };
+  
+  return Room;
+};
