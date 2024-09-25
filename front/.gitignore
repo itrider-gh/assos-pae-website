@@ -94,3 +94,6 @@ sw.*
 #temp selfsigned certif & key
 
 selfsigned*
+
+
+myenv/

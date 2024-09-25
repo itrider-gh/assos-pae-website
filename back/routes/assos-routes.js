@@ -31,7 +31,7 @@ router.get('/:id/members', (req, res, next) => {
     include: [
       {
         model: models.User,
-        as: 'User',
+        as: 'users',
         attributes: ['id', 'displayName']
       }
     ]
@@ -41,7 +41,7 @@ router.get('/:id/members', (req, res, next) => {
       return next(new ErrorHandler(404, 'Association not found'))
     }
 
-    res.json(asso.Users.map(u => ({
+    res.json(asso.users.map(u => ({
       id: u.id,
       displayName: u.displayName,
       hasReservationRight: u.AssoUser.hasReservationRight

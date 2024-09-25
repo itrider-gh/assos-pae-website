@@ -1,5 +1,5 @@
 require('dotenv').config()
-const env = process.env.NODE_ENV || 'development'
+const env = process.env.NODE_ENV || 'production'
 let config = {}
 
 if (env === 'development') {
@@ -8,8 +8,8 @@ if (env === 'development') {
       listenOn: 3001
     },
     hosts: {
-      front: '',
-      back: '',
+      front: 'https://192.168.1.55:3000',
+      back: 'https://192.168.1.55:3001',
       api: 'https://auth.assos.utc.fr',
     },
     api: {
@@ -17,12 +17,12 @@ if (env === 'development') {
       clientSecret: '',
     },
     db: {
-      name: 'pae',
+      name: 'pae_mysql',
       username: 'postgres',
       password: 'root',
-      host: 'localhost',
-      port: '5432',
-      dialect: 'postgres',
+      host: '127.0.0.1',
+      port: '3306',
+      dialect: 'mysql',
     },
     session: {
       cookieKey: 'F4&^HYX8i*E&rzK#G5d^U5Zfqu!njxoVbMVjYckrSDNXq9hTZygx2J5q*'

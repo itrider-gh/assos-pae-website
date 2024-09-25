@@ -19,7 +19,7 @@ const config = require('./config');
 
 // Options pour CORS (autoriser certaines origines)
 var corsOptions = {
-  origin: [config.hosts.front, 'http://localhost:3000', 'http://192.168.1.35:3000'],
+  origin: [config.hosts.front, 'https://192.168.1.55:3000'],
   credentials: true, // Autorise l'envoi des cookies
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'], // Autorise les en-têtes spécifiques

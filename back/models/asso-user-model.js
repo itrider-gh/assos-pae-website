@@ -1,10 +1,14 @@
-'use strict'
+'use strict';
 module.exports = (sequelize, DataTypes) => {
-  const AssoUser = sequelize.define('AssoUser', {
+  const AssoUser = sequelize.define('AssoUser', { // Nom du modèle sans le 's'
     hasReservationRight: DataTypes.BOOLEAN
-  }, {})
+  }, {
+    tableName: 'AssoUsers' // Nom physique de la table si nécessaire
+  });
+
   AssoUser.associate = function(models) {
-    // associations can be defined here
-  }
-  return AssoUser
-}
+    // Pas besoin d'associations supplémentaires ici, elles sont définies dans Asso et User
+  };
+
+  return AssoUser;
+};
