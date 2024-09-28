@@ -54,8 +54,8 @@ app.use((err, req, res, next) => {
 
 // Chargement des certificats SSL (Let's Encrypt ou autre)
 const httpsOptions = {
-  key: fs.readFileSync('/home/adm-six/assos-pae-website/front/selfsigned.key'),   // Clé privée
-  cert: fs.readFileSync('/home/adm-six/assos-pae-website/front/selfsigned.crt') // Certificat SSL
+  key: fs.readFileSync('selfsigned.key'),   // Clé privée
+  cert: fs.readFileSync('selfsigned.crt') // Certificat SSL
 };
 
 // Suppression du socket si déjà existant
