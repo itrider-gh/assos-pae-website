@@ -76,7 +76,7 @@ export default {
   axios: {
     baseURL: prod
       ? 'https://assos.utc.fr/poleae/api'
-      : 'https://192.168.1.55:3001/api',
+      : 'https://api.pae-utc.fr/api',
     credentials: true
   },
   /*

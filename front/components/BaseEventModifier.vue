@@ -97,6 +97,7 @@
 </template>
 
 <script>
+import moment from 'moment-timezone'
 import BaseTimePickerField from '~/components/BaseTimePickerField'
 import BaseDatePickerField from '~/components/BaseDatePickerField'
 
@@ -160,11 +161,12 @@ export default {
     // Show the modal, called by parent
     showModal(event) {
       // If an event is passed, take it's values and convert it to match Pickers format
+      const timeZone = 'UTC'
       if (event) {
         this.eventId = event.id
-        this.date = this.$moment(event.start).format('YYYY-MM-DD')
-        this.startTime = this.$moment(event.start).format('HH:mm')
-        this.endTime = this.$moment(event.end).format('HH:mm')
+        this.date = moment.tz(event.start, timeZone).format('YYYY-MM-DD')
+        this.startTime = moment.tz(event.start, timeZone).format('HH:mm')
+        this.endTime = moment.tz(event.end, timeZone).format('HH:mm')
         this.details = event.details
         this.roomId = event.roomId
         this.assoId = event.Asso ? event.Asso.id : null
@@ -182,11 +184,15 @@ export default {
       this.errorMessage = ''
       this.errors = []
 
+      const timeZone = 'UTC'
+
       const event = {
         roomId: this.roomId,
         assoId: this.assoId,
-        start: this.$moment(`${this.date} ${this.startTime}`).toDate(),
-        end: this.$moment(`${this.date} ${this.endTime}`).toDate(),
+        start: this.$moment
+          .tz(`${this.date} ${this.startTime}`, timeZone)
+          .toDate(),
+        end: this.$moment.tz(`${this.date} ${this.endTime}`, timeZone).toDate(),
         details: this.details,
         hasHealthPass: this.iHaveMyHealthPass
       }
